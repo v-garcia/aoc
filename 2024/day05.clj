@@ -14,7 +14,7 @@
 (def after (update-vals (group-by first rules) #(set (mapv second %))))
 (def before (update-vals (group-by second rules) #(set (mapv first %))))
 
-;; Work
+;; Some fns
 (defn is-before? [a b]
   (let [afters (get after a #{})
         befores (get before b #{})]
@@ -33,8 +33,26 @@
        (validate-update after))))
 
 ;; Q1
-(->> updates 
+(->> updates
      (filter validate-update)
      (mapv get-middle)
-     (apply +)
-     )
+     (apply +))
+
+;; Q2
+
+(defn bubble-sort [xs]
+  (let [ys (reduce (fn [ys x]
+                     (if-let [y (peek ys)]
+                       (if (is-before? x y)
+                         (conj (pop ys) x y)
+                         (conj ys x))
+                       [x])) [] xs)]
+    (if (= xs ys)
+      xs
+      (recur ys))))
+
+(->> updates
+     (remove validate-update)
+     (mapv bubble-sort)
+     (mapv get-middle)
+     (apply +))
